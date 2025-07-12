@@ -7,7 +7,7 @@ export class MailerService {
     private transporter: Transporter;
 
     constructor() {
-        this.transporter = nodemailer.createTransporter({
+        this.transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
                 user: process.env.EMAIL_USER,
@@ -21,7 +21,7 @@ export class MailerService {
             from: `Raund ${process.env.EMAIL_USER}`,
             to,
             subject: 'Welcome to Raund',
-            html: `<p>${text}</p>`
+            html: text
         })
     }
 }
