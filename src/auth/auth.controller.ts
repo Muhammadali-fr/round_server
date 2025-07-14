@@ -1,9 +1,15 @@
-import { Body, Controller, Post, Query, Get } from '@nestjs/common';
+import { Body, Controller, Post, Query, Get, UseGuards, Req } from '@nestjs/common';
+
+// services 
 import { AuthService } from './auth.service';
 
 // dtos 
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+
+// guards 
+import { AuthGuard } from '../guards/auth/auth.guard';
+import { ReqWithUser } from 'src/interfaces/req-with-user.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -22,5 +28,11 @@ export class AuthController {
     @Get("verify-magic-link")
     verifyMagicLink(@Query("token") token: string){
         return this.authService.verifyToken(token);
+    }
+
+    @UseGuards(AuthGuard)
+    @Get("profile")
+    getProfile(@Req() req: ReqWithUser){
+        return this.authService.getProfile(req)
     }
 }
