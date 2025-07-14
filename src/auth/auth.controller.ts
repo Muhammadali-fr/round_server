@@ -35,4 +35,9 @@ export class AuthController {
     getProfile(@Req() req: ReqWithUser){
         return this.authService.getProfile(req)
     }
+
+    @Get('/reset')
+    reset(@Query("token") token: string){
+        return this.authService.resetToken(token)
+    }
 }

@@ -147,7 +147,7 @@ export class AuthService {
 
   async getProfile(req: ReqWithUser) {
     const data = await this.prisma.user.findUnique({
-      where: { email: req.user.email}
+      where: { email: req.user.email }
     })
 
     if (!data) {
@@ -155,6 +155,32 @@ export class AuthService {
     }
 
     return data;
+  }
+
+  async resetToken(token: string) {
+    const payload = this.jwt.verify(token);
+    if (!payload || payload.action !== "reset") {
+      throw new HttpException('Invalid reset token.', 400);
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { email: payload.email }
+    })
+
+    if (!user) {
+      throw new HttpException('User not found.', 404);
+    }
+
+    const access_token: string = this.jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        action: 'access',
+      },
+      { expiresIn: '48h' },
+    );
+
+    return access_token
   }
 
 }
