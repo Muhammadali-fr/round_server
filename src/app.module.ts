@@ -6,9 +6,10 @@ import { MailerModule } from './mailer/mailer.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AppJwtModule } from './jwt/jwt.module';
 import { CartModule } from './cart/cart.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
-  imports: [AuthModule, MailerModule, PrismaModule, AppJwtModule, CartModule],
+  imports: [AuthModule, MailerModule, PrismaModule, AppJwtModule, CartModule, ProductModule],
   controllers: [AppController],
   providers: [AppService],
 })
