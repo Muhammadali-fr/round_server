@@ -182,5 +182,8 @@ export class AuthService {
 
     return access_token
   }
-
+  
+  async updateProfile(){
+    
+  }
 }
