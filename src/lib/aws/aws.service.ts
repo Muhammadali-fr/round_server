@@ -1,9 +1,9 @@
-// libs/aws/aws.service.ts
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuid } from 'uuid';
 import * as path from 'path';
+import * as sharp from 'sharp';
 
 @Injectable()
 export class AwsService {
@@ -23,18 +23,33 @@ export class AwsService {
     });
   }
 
-  async uploadImage(file: Express.Multer.File): Promise<string> {
-    const key = `${uuid()}${path.extname(file.originalname)}`;
+  async uploadProfile(file: Express.Multer.File): Promise<string> {
+    if (file.mimetype === 'image/svg+xml') {
+      throw new HttpException('SVG is not allowed', 400);
+    }
+
+    const fileName = `${uuid()}.webp`; // Always save as .webp
+    const bucket = this.config.get<string>('AWS_S3_BUCKET_NAME')!;
+    const region = this.config.get<string>('AWS_REGION')!;
+
+    const optimizedBuffer = await sharp(file.buffer)
+      .resize({ width: 400, height: 400 })
+      .toFormat('webp', { quality: 50 })
+      .toBuffer();
+
+    console.log('Uploading to bucket:', bucket);
+    console.log('Using region:', region);
+    console.log('Saving as:', fileName);
 
     const command = new PutObjectCommand({
-      Bucket: this.config.get<string>('AWS_S3_BUCKET_NAME')!,
-      Key: key,
-      Body: file.buffer,
-      ContentType: file.mimetype,
+      Bucket: bucket,
+      Key: fileName,
+      Body: optimizedBuffer,
+      ContentType: 'image/webp',
     });
 
     await this.s3.send(command);
 
-    return `https://${this.config.get<string>('AWS_S3_BUCKET_NAME')}.s3.${this.config.get<string>('AWS_REGION')}.amazonaws.com/${key}`;
+    return `https://${bucket}.s3.${region}.amazonaws.com/${fileName}`;
   }
 }

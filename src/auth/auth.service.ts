@@ -198,12 +198,14 @@ export class AuthService {
       throw new HttpException("user not found.", 404)
     }
 
+    if (!file && !name) {
+      throw new HttpException("Nothing to update", 400);
+    }
+
     let profileUrl = user.profile;
 
     if (file) {
-      profileUrl = await this.aws.uploadImage(file);
-    } else {
-      throw new HttpException("file not found", 404)
+      profileUrl = await this.aws.uploadProfile(file);
     }
 
     const updated = await this.prisma.user.update({
