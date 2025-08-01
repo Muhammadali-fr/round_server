@@ -17,12 +17,16 @@ import { HttpException, Injectable } from '@nestjs/common';
 // interfaces 
 import { ReqWithUser } from 'src/interfaces/req-with-user.interface';
 
+// aws 
+import { AwsService } from 'src/lib/aws/aws.service';
+
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
     private mailer: MailerService,
+    private aws: AwsService,
   ) { }
 
   async registerUser(data: RegisterDto) {
@@ -182,8 +186,37 @@ export class AuthService {
 
     return access_token
   }
-  
-  async updateProfile(){
-    
+
+  async updateProfile(req: ReqWithUser, file?: Express.Multer.File, name?: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: req.user.email
+      }
+    })
+
+    if (!user) {
+      throw new HttpException("user not found.", 404)
+    }
+
+    let profileUrl = user.profile;
+
+    if (file) {
+      profileUrl = await this.aws.uploadImage(file);
+    } else {
+      throw new HttpException("file not found", 404)
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        name: name ?? user.name,
+        profile: profileUrl
+      }
+    })
+
+    return {
+      message: 'user updated succesfully',
+      user: updated
+    }
   }
 }
