@@ -1,7 +1,8 @@
-import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { ReqWithUser } from 'src/interfaces/req-with-user.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateProductDto } from './dto/create-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -10,25 +11,32 @@ export class ProductService {
     private prisma: PrismaService
   ) { }
 
-  async create(req: ReqWithUser, data: Prisma.ProductCreateInput) {
+  async create(userId: string, dto: CreateProductDto ) {
 
     const user = await this.prisma.user.findUnique({
-      where: { email: req.user.email }
+      where: { id: userId },
+      select: { id: true, role: true }
     })
 
-    console.log(req.user);
-    
-    if(!user){
-      throw new HttpException('user not found', 404);
+    console.log(userId, user);
+
+    if (!user) {
+      throw new NotFoundException('user not found');
     }
 
-    if(user.role !== 'SELLER'){
-      throw new HttpException("only sellers can create product", 403)
+    if (user.role !== 'SELLER' && user.role === "ADMIN") {
+      throw new ForbiddenException("only sellers can create product")
     }
 
     try {
-      return await this.prisma.product.create({ data })
-    } catch (error) {
+      return await this.prisma.product.create({
+        data: {
+          name: dto.name,
+          description:dto.name,
+          price: dto.price
+        }
+      })
+    } catch  (error) {
       throw new InternalServerErrorException(error.message)
     }
   }

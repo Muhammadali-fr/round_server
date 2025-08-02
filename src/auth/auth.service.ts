@@ -114,6 +114,7 @@ export class AuthService {
         id: newUser.id,
         action: "access"
       });
+      
       const resetToken = this.jwt.sign({
         email: newUser.email,
         id: newUser.id,
