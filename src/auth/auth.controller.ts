@@ -49,9 +49,10 @@ export class AuthController {
     updateProfile(
         @Req() req: ReqWithUser,
         @UploadedFile() file?: Express.Multer.File,
-        @Body('name') name?: string
+        @Body('name') name?: string,
+        @Body('role') role?: 'CUSTOMER' | 'ADMIN'
     ) {
-        return this.authService.updateProfile(req, file, name)
+        return this.authService.updateProfile(req, file, name, role)
     }
 
 }

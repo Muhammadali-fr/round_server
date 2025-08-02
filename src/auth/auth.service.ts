@@ -187,7 +187,12 @@ export class AuthService {
     return access_token
   }
 
-  async updateProfile(req: ReqWithUser, file?: Express.Multer.File, name?: string) {
+  async updateProfile(
+    req: ReqWithUser,
+    file?: Express.Multer.File,
+    name?: string,
+    role?: 'CUSTOMER' | 'ADMIN'
+  ) {
     const user = await this.prisma.user.findUnique({
       where: {
         email: req.user.email
@@ -212,7 +217,8 @@ export class AuthService {
       where: { id: user.id },
       data: {
         name: name ?? user.name,
-        profile: profileUrl
+        profile: profileUrl,
+        role: role ?? user.role,
       }
     })
 
