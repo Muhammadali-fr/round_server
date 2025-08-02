@@ -20,11 +20,12 @@ model User {
   id        String   @id @default(uuid())
   email     String   @unique
   name      String?
-  profile   String? @default("https://round-records.s3.us-east-1.amazonaws.com/21bf16b0-8285-408a-a6b3-64c19bd6f194.webp")
+  profile   String?  @default("https://round-records.s3.us-east-1.amazonaws.com/21bf16b0-8285-408a-a6b3-64c19bd6f194.webp")
   role      Role     @default(CUSTOMER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  products  Product[]
   orders    Order[]
   cartItems CartItem[]
 }
@@ -36,6 +37,9 @@ model Product {
   description String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  User   User?   @relation(fields: [userId], references: [id])
+  userId String?
 
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
@@ -87,10 +91,10 @@ model OrderItem {
 }
 
 model CartItem {
-  id     String @id @default(uuid())
-  user   User   @relation(fields: [userId], references: [id])
-  userId String
-  quantity Int @default(1)
+  id       String @id @default(uuid())
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String
+  quantity Int    @default(1)
 
   productId String
   product   Product @relation(fields: [productId], references: [id])
