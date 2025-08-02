@@ -1,14 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Prisma } from '@prisma/client';
+import { ReqWithUser } from 'src/interfaces/req-with-user.interface';
+import { AuthGuard } from 'src/guards/auth/auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) { }
 
   @Post()
-  create(@Body() createProductDto: Prisma.ProductCreateInput) {
-    return this.productService.create(createProductDto);
+  create(
+    @Req() req: ReqWithUser,
+    @Body() createProductDto: Prisma.ProductCreateInput,
+  ) {
+    return this.productService.create(req, createProductDto);
   }
 
   @Get()

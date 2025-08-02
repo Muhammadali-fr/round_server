@@ -1,5 +1,6 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { ReqWithUser } from 'src/interfaces/req-with-user.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -9,10 +10,24 @@ export class ProductService {
     private prisma: PrismaService
   ) { }
 
-  async create(data: Prisma.ProductCreateInput) {
+  async create(req: ReqWithUser, data: Prisma.ProductCreateInput) {
+
+    const user = await this.prisma.user.findUnique({
+      where: { email: req.user.email }
+    })
+
+    console.log(req.user);
+    
+    if(!user){
+      throw new HttpException('user not found', 404);
+    }
+
+    if(user.role !== 'SELLER'){
+      throw new HttpException("only sellers can create product", 403)
+    }
 
     try {
-      return this.prisma.product.create({ data })
+      return await this.prisma.product.create({ data })
     } catch (error) {
       throw new InternalServerErrorException(error.message)
     }
