@@ -6,12 +6,12 @@ import { DatabaseService } from 'src/database/database.service';
 @Injectable()
 export class ProductService {
 
-  constructor (
+  constructor(
     private database: DatabaseService
-  ){}
+  ) { }
 
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
+  async create(createProductDto: CreateProductDto) {
+    return await this.database.product.create({ data: createProductDto });
   }
 
   findAll() {
