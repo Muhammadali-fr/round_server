@@ -116,8 +116,13 @@ export class AuthService {
         }
     }
 
-    async get_profile(req: any) {
-        return req
-    }
+    async get_profile(user: any) {
+        const data = await this.database.user.findUnique({
+            where: { email: user.email }
+        })
 
+        if (!data) throw new NotFoundException('user not found')
+
+        return data;
+    }
 }
