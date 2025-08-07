@@ -4,6 +4,7 @@ import { RegisterDto } from './dto/register.dto';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from 'src/mailer/mailer.service';
 import { LoginDto } from './dto/login.dto';
+import { ReqWithUser } from 'src/interface/req_with_user.interface';
 
 @Injectable()
 export class AuthService {
@@ -115,8 +116,8 @@ export class AuthService {
         }
     }
 
-    async get_profile() {
-        return 'get profile'
+    async get_profile(req: any) {
+        return req
     }
 
 }
