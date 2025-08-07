@@ -114,6 +114,8 @@ export class AuthService {
 
             return { access_token, reset_token }
         }
+
+        return 'you have nothing'
     }
 
     async get_profile(user: any) {
