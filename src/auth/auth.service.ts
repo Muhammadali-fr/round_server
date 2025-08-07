@@ -111,8 +111,12 @@ export class AuthService {
                 action: 'reset'
             })
 
-            return {access_token, reset_token}
+            return { access_token, reset_token }
         }
+    }
+
+    async get_profile() {
+        return 'get profile'
     }
 
 }
