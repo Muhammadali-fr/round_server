@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { DatabaseService } from 'src/database/database.service';
@@ -11,22 +11,54 @@ export class ProductService {
   ) { }
 
   async create(createProductDto: CreateProductDto) {
-    return await this.database.product.create({ data: createProductDto });
+    try {
+      const product = await this.database.product.create({
+        data: createProductDto
+      })
+
+      return product;
+    } catch (error) {
+      console.log(error);
+      throw error
+    }
   }
 
-  findAll() {
-    return this.database.product.findMany();
+  async find_all() {
+    return await this.database.product.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async find_one(id: string) {
+    const product = await this.database.product.findUnique({
+      where: { id }
+    })
+
+    if (!product) throw new NotFoundException('product not found');
+
+    return product;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(id: string, updateProductDto: UpdateProductDto) {
+    const product = await this.database.product.findUnique({
+      where: { id }
+    })
+
+    if (!product) throw new NotFoundException('product not found')
+
+    const updated_product = await this.database.product.update({
+      where: { id },
+      data: updateProductDto
+    })
+
+    return updated_product;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: string) {
+    const product = await this.database.product.delete({
+      where: { id }
+    })
+
+    if (!product) throw new NotFoundException('product not found')
+
+    return 'deleted successfully'
   }
 }
