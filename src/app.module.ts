@@ -6,10 +6,18 @@ import { ProductModule } from './product/product.module';
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from './mailer/mailer.module';
 import { UserModule } from './user/user.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [DatabaseModule, ProductModule, AuthModule, MailerModule, UserModule],
+  imports: [
+    DatabaseModule,
+    ProductModule,
+    AuthModule,
+    MailerModule,
+    UserModule,
+    ConfigModule.forRoot({ isGlobal: true })
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
