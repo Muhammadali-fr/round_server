@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -10,8 +10,11 @@ export class ProductController {
 
   @UseGuards(AuthGuard)
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+  create(
+    @Body() createProductDto: CreateProductDto,
+    @Req() user: any
+  ) {
+    return this.productService.create(createProductDto, user);
   }
 
   @Get()

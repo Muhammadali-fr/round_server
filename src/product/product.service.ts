@@ -10,8 +10,11 @@ export class ProductService {
     private database: DatabaseService
   ) { }
 
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto, user: any) {
     try {
+
+      return user
+
       const product = await this.database.product.create({
         data: createProductDto
       })

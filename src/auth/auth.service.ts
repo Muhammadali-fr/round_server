@@ -1,10 +1,9 @@
-import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { RegisterDto } from './dto/register.dto';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from 'src/mailer/mailer.service';
 import { LoginDto } from './dto/login.dto';
-import { ReqWithUser } from 'src/interface/req_with_user.interface';
 
 @Injectable()
 export class AuthService {
@@ -20,13 +19,13 @@ export class AuthService {
                 where: { email: data.email }
             })
 
-            if (exist_user) throw new HttpException('user already exists', 400)
+            if (exist_user) throw new HttpException('user already exists', 400);
 
             const verify_token = await this.jwt.sign({
                 email: data.email,
                 name: data.name,
                 action: "register"
-            }, { expiresIn: "3m" })
+            }, { expiresIn: "3m", secret: process.env.JWT_SECRET })
 
             const link = `${process.env.FRONTEND_URL}/auth/verify?token=${verify_token}`
             this.mailer.send_mail(
@@ -49,7 +48,7 @@ export class AuthService {
             email: user.email,
             name: user.name,
             action: 'login'
-        }, { expiresIn: '3m' })
+        }, { expiresIn: '3m', secret: process.env.JWT_SECRET })
 
         const link = `${process.env.FRONTEND_URL}/auth/verify?token=${verify_token}`
 
@@ -63,11 +62,14 @@ export class AuthService {
 
     async verify_user(token: string) {
 
-        const data = this.jwt.verify(token)
-        if (!data) throw new HttpException('invalid token', 400)
+        let data: any;
+        try {
+            data = this.jwt.verify(token, { secret: process.env.JWT_SECRET });
+        } catch (error) {
+            throw new UnauthorizedException('Invalid or expired token');
+        }
 
-        // register user function here 
-        if (data.action = 'register') {
+        if (data.action === 'register') {
 
             const exist_user = await this.database.user.findUnique({ where: { email: data.email } })
 
@@ -86,19 +88,18 @@ export class AuthService {
                 email: new_user.email,
                 name: new_user.name,
                 action: 'access'
-            })
+            }, { secret: process.env.JWT_SECRET })
 
             const reset_token = this.jwt.sign({
                 email: new_user.email,
                 name: new_user.name,
                 action: 'reset'
-            })
+            }, { secret: process.env.JWT_SECRET })
 
             return { access_token, reset_token }
         }
 
-        // login user function 
-        if (data.action = 'login') {
+        if (data.action === 'login') {
 
             const user = await this.database.user.findUnique({ where: { email: data.email } });
 
@@ -108,13 +109,13 @@ export class AuthService {
                 email: user.email,
                 name: user.name,
                 action: 'access'
-            })
+            }, { secret: process.env.JWT_SECRET })
 
             const reset_token = this.jwt.sign({
                 email: user.email,
                 name: user.name,
                 action: 'reset'
-            })
+            }, { secret: process.env.JWT_SECRET })
 
             return { access_token, reset_token }
         }

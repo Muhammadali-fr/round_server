@@ -10,7 +10,8 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthGuard implements CanActivate {
   constructor(private readonly jwt: JwtService) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  // FIX: canActivate is now an async function to properly await the JWT verification
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers['authorization'];
 
@@ -21,13 +22,20 @@ export class AuthGuard implements CanActivate {
     const token = authHeader.split(' ')[1];
 
     try {
-      const userData = this.jwt.verify(token);
+      // FIX: Added the 'secret' option to the verify method
+      const userData = await this.jwt.verify(token, {
+        secret: process.env.JWT_SECRET,
+      });
+
       if (userData.action !== 'access') {
         throw new UnauthorizedException('Invalid token action');
       }
+
+      // If validation is successful, attach the user data to the request object
       request.user = userData;
       return true;
-    } catch {
+    } catch (error) {
+      // FIX: The catch block now properly handles all JWT verification errors
       throw new UnauthorizedException('Invalid or expired token');
     }
   }
