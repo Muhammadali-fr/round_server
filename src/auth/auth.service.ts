@@ -55,7 +55,7 @@ export class AuthService {
 
         this.mailer.send_mail(
             user.email,
-            `<a href="${link}"><button style="background-color: #6D28D9; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Click to Register</button></a>`
+            `<a href="${link}"><button style="background-color: #d92828ff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Click to Register</button></a>`
         )
 
         return `message sent to ${user.email}, token expires in 3 minutes`
