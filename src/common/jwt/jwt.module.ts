@@ -3,7 +3,7 @@ import { JwtModule } from "@nestjs/jwt";
 @Module({
     imports: [
         JwtModule.register({
-            secret: process.env.JWT_SECRET
+            secret: process.env.JWT_SECRET || 'public_key'
         })
     ],
     exports: [JwtModule]

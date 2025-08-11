@@ -17,11 +17,15 @@ export class MailerService {
     }
 
     send_mail(to: string, html: string) {
-        this.transporter.sendMail({
-            from: `Round eCommerce shop`,
-            to,
-            subject: 'welcome to Round',
-            html
-        })
+        try {
+            this.transporter.sendMail({
+                from: `Round eCommerce shop`,
+                to,
+                subject: 'welcome to Round',
+                html
+            })
+        } catch (error) {
+            throw new error
+        }
     }
 }
