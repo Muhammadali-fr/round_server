@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { register_dto } from './dto/register.dto';
 import { login_dto } from './dto/login.dto';
 import { JwtAuthGuard } from 'src/common/guards/auth.guard';
 import type { Req_with_user } from 'src/interfaces/req_with_user.interface';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('auth')
 export class AuthController {

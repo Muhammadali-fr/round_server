@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { MailerService } from 'src/mailer/mailer.service';
 import { login_dto } from './dto/login.dto';
 import { Req_with_user } from 'src/interfaces/req_with_user.interface';
+import { AwsService } from 'src/common/aws/aws.service';
 
 const secret = process.env.JWT_SECRET;
 
@@ -14,7 +15,8 @@ export class AuthService {
     constructor(
         private prisma: PrismaService,
         private jwt: JwtService,
-        private mailer: MailerService
+        private mailer: MailerService,
+        private aws: AwsService
     ) { }
 
     async register_user(data: register_dto) {
