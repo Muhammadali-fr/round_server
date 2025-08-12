@@ -124,12 +124,12 @@ export class AuthService {
                 email: user.email,
                 id: user.id,
                 action: "access"
-            }, {secret});
+            }, { secret });
             const resetToken = this.jwt.sign({
                 email: user.email,
                 id: user.id,
                 action: "reset"
-            }, {secret});
+            }, { secret });
 
             return { accessToken, resetToken };
         }
@@ -137,7 +137,10 @@ export class AuthService {
 
     async get_profile(req: Req_with_user) {
         const data = await this.prisma.user.findUnique({
-            where: { email: req.user.email }
+            where: { email: req.user.email },
+            include: {
+                products: true
+            }
         })
 
         if (!data) {
