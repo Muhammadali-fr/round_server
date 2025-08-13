@@ -20,6 +20,9 @@ export class CreateProductDto {
     @IsNumber()
     price: number;
 
+    @IsNotEmpty()
+    @IsNumber()
+    stock: number;
 
     @IsArray()
     @ValidateNested({ each: true })

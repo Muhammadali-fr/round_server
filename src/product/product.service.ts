@@ -32,6 +32,7 @@ export class ProductService {
           image: createProductDto.image,
           price: createProductDto.price,
           UserId: user.id,
+          stock: createProductDto.stock,
           images: {
             create: createProductDto.images.map((img): { url: string } => ({
               url: img.url,
