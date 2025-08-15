@@ -132,7 +132,10 @@ export class ProductService {
     if (!file) {
       throw new Error("No file uploaded");
     }
-    return await this.aws.upload_product_image(file);
+    const res = await this.aws.upload_product_image(file);
+    console.log(res);
+    return res;
   }
+
 }
 
