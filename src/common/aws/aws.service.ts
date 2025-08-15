@@ -94,10 +94,9 @@ export class AwsService {
         this.logger.log(`Processing product image: ${file.originalname} -> ${fileName}`);
 
         try {
-            // Optimize product image for web
             const optimizedBuffer = await sharp(file.buffer)
-                .resize({ width: 800, height: 800, fit: 'cover' }) // Bigger than profile images
-                .toFormat('webp') // Higher quality for product photos
+                .resize({ width: 600, height: 800, fit: 'cover' }) 
+                .toFormat('webp', {quality: 1}) 
                 .toBuffer();
 
             const command = new PutObjectCommand({
