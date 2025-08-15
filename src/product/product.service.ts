@@ -2,12 +2,14 @@ import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundE
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { AwsService } from 'src/common/aws/aws.service';
 
 @Injectable()
 export class ProductService {
 
   constructor(
-    private prisma: PrismaService
+    private prisma: PrismaService,
+    private aws: AwsService
   ) { }
 
   async create(createProductDto: CreateProductDto, userId: string) {
@@ -119,12 +121,18 @@ export class ProductService {
         where: { id },
       });
 
-      return {message: `Product named ${deleted_product.name} deleted successfully.`}
+      return { message: `Product named ${deleted_product.name} deleted successfully.` }
 
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
   }
 
+  async upload_product_image(file?: Express.Multer.File) {
+    if (!file) {
+      throw new Error("No file uploaded");
+    }
+    return await this.aws.upload_product_image(file);
+  }
 }
 

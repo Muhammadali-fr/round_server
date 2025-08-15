@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { JwtAuthGuard } from 'src/common/guards/auth.guard';
 import type { Req_with_user } from 'src/interfaces/req_with_user.interface';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('product')
 export class ProductController {
@@ -40,5 +41,11 @@ export class ProductController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.productService.remove(id);
+  }
+
+  @Post('/image')
+  @UseInterceptors(FileInterceptor('file'))
+  upload_image(@UploadedFile() file: Express.Multer.File) {
+    return this.productService.upload_product_image(file);
   }
 }

@@ -71,4 +71,52 @@ export class AwsService {
             throw new HttpException('An error occurred while uploading the file.', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    async upload_product_image(file: Express.Multer.File): Promise<{ url: string }> {
+        if (!file) {
+            throw new HttpException('No file provided', HttpStatus.BAD_REQUEST);
+        }
+
+        if (file.mimetype === 'image/svg+xml') {
+            this.logger.warn(`Blocked attempt to upload SVG file: ${file.originalname}`);
+            throw new HttpException('SVG files are not allowed for security reasons.', HttpStatus.BAD_REQUEST);
+        }
+
+        const fileName = `${uuid()}.webp`; // Store as optimized webp
+        const bucket = this.config.get<string>('AWS_S3_BUCKET_NAME');
+        const region = this.config.get<string>('AWS_REGION');
+
+        if (!bucket) {
+            this.logger.error('AWS_S3_BUCKET_NAME is not configured.');
+            throw new HttpException('File upload configuration is incomplete.', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        this.logger.log(`Processing product image: ${file.originalname} -> ${fileName}`);
+
+        try {
+            // Optimize product image for web
+            const optimizedBuffer = await sharp(file.buffer)
+                .resize({ width: 800, height: 800, fit: 'cover' }) // Bigger than profile images
+                .toFormat('webp') // Higher quality for product photos
+                .toBuffer();
+
+            const command = new PutObjectCommand({
+                Bucket: bucket,
+                Key: fileName,
+                Body: optimizedBuffer,
+                ContentType: 'image/webp',
+            });
+
+            this.logger.log(`Uploading product image ${fileName} to bucket ${bucket}...`);
+            await this.s3.send(command);
+            this.logger.log(`Product image uploaded successfully: ${fileName}`);
+
+            const url = `https://${bucket}.s3.${region}.amazonaws.com/${fileName}`;
+            return { url };
+        } catch (error) {
+            this.logger.error(`Failed to upload product image: ${error.message}`, error.stack);
+            throw new HttpException('An error occurred while uploading the product image.', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
