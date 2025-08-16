@@ -23,9 +23,4 @@ export class CreateProductDto {
     @IsNotEmpty()
     @IsNumber()
     stock: number;
-
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => CreateProductImageDto)
-    images: CreateProductImageDto[];
 }

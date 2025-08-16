@@ -12,7 +12,7 @@ export class ProductService {
     private aws: AwsService
   ) { }
 
-  async create(createProductDto: CreateProductDto, userId: string, files: Express.Multer.File) {
+  async create(createProductDto: CreateProductDto, userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, role: true }
@@ -35,11 +35,6 @@ export class ProductService {
           price: createProductDto.price,
           UserId: user.id,
           stock: createProductDto.stock,
-          images: {
-            create: createProductDto.images.map((img): { url: string } => ({
-              url: img.url,
-            }))
-          }
         },
         include: {
           images: true
@@ -75,32 +70,32 @@ export class ProductService {
     }
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  // async update(id: string, updateProductDto: UpdateProductDto) {
 
-    const { images, ...rest } = updateProductDto;
+  //   const { images, ...rest } = updateProductDto;
 
-    try {
-      const updated = await this.prisma.product.update({
-        where: { id },
-        data: {
-          ...rest,
-          ...(images && {
-            images: {
-              deleteMany: {},
-              create: images.map((img) => ({ url: img.url }))
-            }
-          })
-        },
-        include: {
-          images: true
-        }
-      });
+  //   try {
+  //     const updated = await this.prisma.product.update({
+  //       where: { id },
+  //       data: {
+  //         ...rest,
+  //         ...(images && {
+  //           images: {
+  //             deleteMany: {},
+  //             create: images.map((img) => ({ url: img.url }))
+  //           }
+  //         })
+  //       },
+  //       include: {
+  //         images: true
+  //       }
+  //     });
 
-      return updated;
-    } catch (error) {
-      throw new InternalServerErrorException(error.message);
-    }
-  }
+  //     return updated;
+  //   } catch (error) {
+  //     throw new InternalServerErrorException(error.message);
+  //   }
+  // }
 
   async remove(id: string) {
     const product = await this.prisma.product.findUnique({
@@ -128,28 +123,18 @@ export class ProductService {
     }
   }
 
-  async uploadProductImages(productId: string, files: Express.Multer.File[], userId: string) {
-    const product = await this.prisma.product.findUnique({ where: { id: productId } });
-
-    if (!product) {
-      throw new NotFoundException(`${productId} ID'li mahsulot topilmadi.`);
+  async create_product_images(files: Express.Multer.File[]) {
+    if (!files || files.length === 0) {
+      return 'you didn’t send images';
     }
 
-    if (product.UserId !== userId) {
-      throw new ForbiddenException('Sizda bu mahsulotga rasm qo\'shishga ruxsat yo\'q.');
-    }
+    const urls = await Promise.all(
+      files.map(img => this.aws.upload_product_image(img))
+    );
 
-    const uploadPromises = files.map(file => this.aws.upload_product_image(file));
-    const uploadResults = await Promise.all(uploadPromises);
-
-    const createdImages = await this.prisma.product_images.createMany({
-      data: uploadResults.map(result => ({
-        url: result.url,
-        productId: productId,
-      })),
-    });
-
-    return createdImages;
+    console.log(urls);
+  
+    return urls;    
   }
-}
 
+}
