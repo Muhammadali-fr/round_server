@@ -57,7 +57,10 @@ export class ProductService {
   async find_one(id: string) {
     try {
       const product = await this.prisma.product.findUnique({
-        where: { id }
+        where: { id },
+        include: {
+          images: true
+        }
       });
 
       if (!product) {
