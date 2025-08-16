@@ -12,7 +12,7 @@ export class ProductService {
     private aws: AwsService
   ) { }
 
-  async create(createProductDto: CreateProductDto, userId: string) {
+  async create(createProductDto: CreateProductDto, userId: string, files: Express.Multer.File) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, role: true }
@@ -135,16 +135,13 @@ export class ProductService {
       throw new NotFoundException(`${productId} ID'li mahsulot topilmadi.`);
     }
 
-    // AVTORIZATSIYA: Foydalanuvchi egaligini tekshirish
     if (product.UserId !== userId) {
       throw new ForbiddenException('Sizda bu mahsulotga rasm qo\'shishga ruxsat yo\'q.');
     }
 
-    // 1. Barcha fayllarni parallel ravishda AWS'ga yuklash
     const uploadPromises = files.map(file => this.aws.upload_product_image(file));
     const uploadResults = await Promise.all(uploadPromises);
 
-    // 2. Olingan URL manzillarini ma'lumotlar bazasiga saqlash
     const createdImages = await this.prisma.product_images.createMany({
       data: uploadResults.map(result => ({
         url: result.url,

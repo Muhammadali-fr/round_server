@@ -4,7 +4,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { JwtAuthGuard } from 'src/common/guards/auth.guard';
 import type { Req_with_user } from 'src/interfaces/req_with_user.interface';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('product')
 export class ProductController {
@@ -14,11 +14,13 @@ export class ProductController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
+  @UseInterceptors(AnyFilesInterceptor())
   create(
+    @UploadedFiles() files: Express.Multer.File,
     @Body() createProductDto: CreateProductDto,
     @Req() req: Req_with_user
   ) {
-    return this.productService.create(createProductDto, req.user.id);
+    return this.productService.create(createProductDto, req.user.id, files);
   }
 
   @Get()
@@ -44,16 +46,14 @@ export class ProductController {
   }
 
 
-  // Muayyan mahsulot uchun rasmlarni yuklash
   @Post(':id/images')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FilesInterceptor('files', 6)) // 10 tagacha rasm yuklash mumkin
+  @UseInterceptors(FilesInterceptor('files', 6))
   uploadImages(
     @Param('id') id: string,
     @UploadedFiles() files: Express.Multer.File[],
     @Req() req: Req_with_user,
   ) {
-    // Service qatlamida egalik tekshiriladi va keyin rasmlar yuklanadi
     return this.productService.uploadProductImages(id, files, req.user.id);
   }
 }
