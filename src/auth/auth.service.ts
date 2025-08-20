@@ -19,6 +19,26 @@ export class AuthService {
         private aws: AwsService
     ) { }
 
+    private generateTokens(userId: string, email: string) {
+        const accessToken = this.jwt.sign(
+            { id: userId, email, action: 'access' },
+            {
+                secret: process.env.JWT_SECRET,
+                expiresIn: '12h',
+            },
+        );
+
+        const refreshToken = this.jwt.sign(
+            { id: userId, email, action: 'refresh' },
+            {
+                secret: process.env.JWT_SECRET,
+                expiresIn: '7d',
+            },
+        );
+
+        return { accessToken, refreshToken };
+    }
+
     async register_user(data: register_dto) {
         const existUser = await this.prisma.user.findUnique({
             where: { email: data.email }
@@ -97,19 +117,7 @@ export class AuthService {
                 throw new HttpException('User registration failed.', 500);
             }
 
-            const accessToken = this.jwt.sign({
-                email: newUser.email,
-                id: newUser.id,
-                action: "access"
-            }, { secret });
-
-            const resetToken = this.jwt.sign({
-                email: newUser.email,
-                id: newUser.id,
-                action: "reset"
-            }, { secret });
-
-            return { accessToken, resetToken };
+            return this.generateTokens(newUser.id, newUser.email)
         }
 
         // Logging in user
@@ -122,19 +130,10 @@ export class AuthService {
                 throw new HttpException('User not found.', 404);
             }
 
-            const accessToken = this.jwt.sign({
-                email: user.email,
-                id: user.id,
-                action: "access"
-            }, { secret });
-            const resetToken = this.jwt.sign({
-                email: user.email,
-                id: user.id,
-                action: "reset"
-            }, { secret });
-
-            return { accessToken, resetToken };
+            return this.generateTokens(user.id, user.email)
         }
+
+        throw new HttpException('Invalid token method', 400);
     }
 
     async get_profile(req: Req_with_user) {
@@ -152,29 +151,34 @@ export class AuthService {
         return data;
     }
 
-    async reset_token(token: string) {
-        const payload = this.jwt.verify(token);
-        if (!payload || payload.action !== "reset") {
-            throw new HttpException('Invalid reset token.', 400);
+    async refresh_token(token: string) {
+        try {
+            const payload = this.jwt.verify(token, { secret });
+
+            if (!payload || payload.action !== "refresh") {
+                throw new HttpException('Invalid refresh token.', 400);
+            }
+
+            const user = await this.prisma.user.findUnique({
+                where: { email: payload.email }
+            })
+
+            if (!user) {
+                throw new HttpException('User not found.', 404);
+            }
+
+            const accessToken: string = this.jwt.sign(
+                {
+                    id: user.id,
+                    email: user.email,
+                    action: 'access',
+                },
+                { expiresIn: '12h' },
+            );
+
+            return { accessToken }
+        } catch (e) {
+            throw new HttpException('Invalid or expired refresh token.', 401);
         }
-
-        const user = await this.prisma.user.findUnique({
-            where: { email: payload.email }
-        })
-
-        if (!user) {
-            throw new HttpException('User not found.', 404);
-        }
-
-        const access_token: string = this.jwt.sign(
-            {
-                id: user.id,
-                email: user.email,
-                action: 'access',
-            },
-            { expiresIn: '48h' },
-        );
-
-        return access_token
     }
 }
