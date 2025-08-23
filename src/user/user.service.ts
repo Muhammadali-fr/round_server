@@ -77,4 +77,19 @@ export class UserService {
         }
     }
 
+    async delete_user(user_id) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: user_id }
+        });
+
+        if (!user) {
+            throw new HttpException("user not found.", 404)
+        }
+
+        await this.prisma.user.delete({
+            where: { id: user_id }
+        })
+
+        return `User deleted successfully`;
+    }
 }

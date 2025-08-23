@@ -6,8 +6,7 @@ import { MailerService } from 'src/mailer/mailer.service';
 import { login_dto } from './dto/login.dto';
 import { Req_with_user } from 'src/interfaces/req_with_user.interface';
 import { AwsService } from 'src/common/aws/aws.service';
-
-const secret = process.env.JWT_SECRET;
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -16,30 +15,29 @@ export class AuthService {
         private prisma: PrismaService,
         private jwt: JwtService,
         private mailer: MailerService,
-        private aws: AwsService
+        private aws: AwsService,
+        private config: ConfigService
     ) { }
 
     private generateTokens(userId: string, email: string) {
+        const secret = this.config.get<string>('JWT_SECRET');
+
         const accessToken = this.jwt.sign(
             { id: userId, email, action: 'access' },
-            {
-                secret: process.env.JWT_SECRET,
-                expiresIn: '12h',
-            },
+            { secret, expiresIn: '12h' }
         );
 
         const refreshToken = this.jwt.sign(
             { id: userId, email, action: 'refresh' },
-            {
-                secret: process.env.JWT_SECRET,
-                expiresIn: '7d',
-            },
+            { secret, expiresIn: '7d' }
         );
 
         return { accessToken, refreshToken };
     }
 
     async register_user(data: register_dto) {
+        const secret = this.config.get<string>('JWT_SECRET');
+
         const existUser = await this.prisma.user.findUnique({
             where: { email: data.email }
         });
@@ -52,7 +50,7 @@ export class AuthService {
             email: data.email,
             name: data.name,
             method: "register"
-        }, { expiresIn: '5m', secret });
+        }, { secret, expiresIn: '5m' });
 
         const link = `${process.env.FRONTEND_URL}/auth/verify?token=${verifyToken}`;
         this.mailer.send_mail(
@@ -66,6 +64,8 @@ export class AuthService {
     }
 
     async login_user(data: login_dto) {
+        const secret = this.config.get<string>('JWT_SECRET');
+
         const user = await this.prisma.user.findUnique({
             where: { email: data.email }
         });
@@ -77,7 +77,7 @@ export class AuthService {
         const token = this.jwt.sign({
             email: user.email,
             method: "login"
-        }, { expiresIn: '5m', secret });
+        }, { secret, expiresIn: '5m' });
 
         const magicLink = `${process.env.FRONTEND_URL}/auth/verify?token=${token}`;
         this.mailer.send_mail(
@@ -91,6 +91,8 @@ export class AuthService {
     }
 
     async verify_user(token: string) {
+        const secret = this.config.get<string>('JWT_SECRET');
+
         const data = this.jwt.verify(token, { secret });
         if (!data) {
             throw new HttpException('Invalid token', 400);
@@ -130,6 +132,8 @@ export class AuthService {
                 throw new HttpException('User not found.', 404);
             }
 
+            console.log(this.generateTokens(user.id, user.email));
+
             return this.generateTokens(user.id, user.email)
         }
 
@@ -152,6 +156,8 @@ export class AuthService {
     }
 
     async refresh_token(token: string) {
+        const secret = this.config.get<string>('JWT_SECRET');
+
         try {
             const payload = this.jwt.verify(token, { secret });
 
@@ -173,11 +179,12 @@ export class AuthService {
                     email: user.email,
                     action: 'access',
                 },
-                { expiresIn: '12h' },
+                { secret, expiresIn: '12h' },
             );
 
             return { accessToken }
         } catch (e) {
+            console.log(e);
             throw new HttpException('Invalid or expired refresh token.', 401);
         }
     }

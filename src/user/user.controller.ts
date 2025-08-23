@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
 import type { Req_with_user } from 'src/interfaces/req_with_user.interface';
 import { JwtAuthGuard } from 'src/common/guards/auth.guard';
@@ -30,5 +30,10 @@ export class UserController {
         @Body('role') role?: 'CUSTOMER' | 'SELLER',
     ) {
         return this.user_service.update_profile(req, file, name, role);
+    }
+
+    @Delete(':id')
+    delete_user(@Param('id') user_id: string) {
+        return this.user_service.delete_user(user_id);
     }
 }
