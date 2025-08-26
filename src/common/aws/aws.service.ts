@@ -58,7 +58,6 @@ export class AwsService {
                 Key: fileName,
                 Body: optimizedBuffer,
                 ContentType: 'image/webp',
-                ACL: 'public-read', // Make file public
             });
 
             this.logger.log(`Uploading ${fileName} to bucket ${bucket}...`);
