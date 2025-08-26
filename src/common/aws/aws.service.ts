@@ -50,7 +50,7 @@ export class AwsService {
             // Optimize image using sharp
             const optimizedBuffer = await sharp(file.buffer)
                 .resize({ width: 400, height: 400, fit: 'cover' }) // Resize to 400x400
-                .toFormat('webp', { quality: 50 })
+                .toFormat('webp', { quality: 1 })
                 .toBuffer();
 
             const command = new PutObjectCommand({
@@ -95,8 +95,8 @@ export class AwsService {
 
         try {
             const optimizedBuffer = await sharp(file.buffer)
-                .resize({ width: 600, height: 800, fit: 'cover' }) 
-                .toFormat('webp', {quality: 1}) 
+                .resize({ width: 600, height: 800, fit: 'cover' })
+                .toFormat('webp', { quality: 1 })
                 .toBuffer();
 
             const command = new PutObjectCommand({

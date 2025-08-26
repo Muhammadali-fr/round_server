@@ -132,8 +132,6 @@ export class AuthService {
                 throw new HttpException('User not found.', 404);
             }
 
-            console.log(this.generateTokens(user.id, user.email));
-
             return this.generateTokens(user.id, user.email)
         }
 
@@ -184,7 +182,6 @@ export class AuthService {
 
             return { accessToken }
         } catch (e) {
-            console.log(e);
             throw new HttpException('Invalid or expired refresh token.', 401);
         }
     }

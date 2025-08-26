@@ -140,8 +140,6 @@ export class ProductService {
       files.map(img => this.aws.upload_product_image(img))
     );
 
-    console.log(urls);
-  
     return urls;    
   }
 
