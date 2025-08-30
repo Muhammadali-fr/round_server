@@ -92,4 +92,13 @@ export class UserService {
 
         return `User deleted successfully`;
     }
+
+    async delete_all() {
+        try {
+            await this.prisma.user.deleteMany();
+            return `done`;
+        } catch (r) {
+            throw new InternalServerErrorException(r.message)
+        }
+    }
 }

@@ -39,7 +39,7 @@ model Product {
   images Product_images[]
   tags   Tag[]
 
-  User   User   @relation(fields: [UserId], references: [id])
+  User   User   @relation(fields: [UserId], references: [id], onDelete: Cascade)
   UserId String
 }
 
@@ -47,7 +47,7 @@ model Product_images {
   id  String @id @default(uuid())
   url String
 
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
 }
 

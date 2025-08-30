@@ -36,4 +36,9 @@ export class UserController {
     delete_user(@Param('id') user_id: string) {
         return this.user_service.delete_user(user_id);
     }
+
+    @Delete()
+    delete_all() {
+        return this.user_service.delete_all();
+    }
 }
