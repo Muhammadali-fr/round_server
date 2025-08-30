@@ -140,7 +140,16 @@ export class ProductService {
       files.map(img => this.aws.upload_product_image(img))
     );
 
-    return urls;    
+    return urls;
+  }
+
+  async delete_all() {
+    try {
+      await this.prisma.product.deleteMany({});
+      return "deleted successfully";
+    } catch (error) {
+      console.log(error);
+    }
   }
 
 }
