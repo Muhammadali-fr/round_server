@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -105,7 +105,7 @@ export class ProductService {
   //   }
   // }
 
-  async remove(id: string) {
+  async remove(id: string, userId: string) {
     const product = await this.prisma.product.findUnique({
       where: { id },
       include: { images: true },
@@ -113,6 +113,10 @@ export class ProductService {
 
     if (!product) {
       throw new NotFoundException(`Product with id ${id} not found`);
+    }
+
+    if (product.UserId !== userId) {
+      throw new UnauthorizedException('you are not creator of this product');
     }
 
     try {
