@@ -8,7 +8,7 @@ export class CategoryService {
         private prisma: PrismaService,
     ) { }
 
-    async get_products() {
+    async get_categories() {
         try {
             return await this.prisma.category.findMany();
         } catch (r) {
@@ -37,4 +37,28 @@ export class CategoryService {
             throw new InternalServerErrorException(r.message);
         };
     };
+
+    async delete_categories() {
+        try {
+            await this.prisma.category.deleteMany();
+            return 'delted succesfully';
+        } catch (r) {
+            throw new InternalServerErrorException(r.message);
+        };
+    };
+
+    async delete_one(id: string) {
+        const category = await this.prisma.category.findUnique({ where: { id } });
+
+        if (!category) {
+            throw new NotFoundException('category not found');
+        }
+
+        try {
+            await this.prisma.category.delete({ where: { id } });
+            return 'deleted succesfully';
+        } catch (r) {
+            throw new InternalServerErrorException(r.message);
+        };
+    }
 };

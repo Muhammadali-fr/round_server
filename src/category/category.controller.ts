@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post } from "@nestjs/common";
 import { CategoryService } from "./category.service";
 import { CreateCategoryDto } from "./dto/create-category-dto";
 
@@ -10,7 +10,7 @@ export class CategoryController {
 
     @Get()
     get_all() {
-        return this.categoryService.get_products();
+        return this.categoryService.get_categories();
     };
 
     @Get(':id')
@@ -21,5 +21,15 @@ export class CategoryController {
     @Post()
     create(@Body() data: CreateCategoryDto) {
         return this.categoryService.create(data);
+    };
+
+    @Delete()
+    delete_categories() {
+        return this.categoryService.delete_categories();
+    };
+
+    @Delete(':id')
+    delete_one(@Param('id') id: string) {
+        return this.categoryService.delete_one(id);
     };
 };
