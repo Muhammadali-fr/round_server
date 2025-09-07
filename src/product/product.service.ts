@@ -152,7 +152,7 @@ export class ProductService {
       await this.prisma.product.deleteMany({});
       return "deleted successfully";
     } catch (error) {
-      console.log(error);
+      throw new InternalServerErrorException(error.message);
     }
   }
 
