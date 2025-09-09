@@ -28,4 +28,8 @@ export class CreateProductDto {
     @ValidateNested({ each: true })
     @Type(() => CreateProductImageDto)
     images: CreateProductImageDto[]
+
+    @IsString()
+    @IsNotEmpty()
+    category: string;
 }

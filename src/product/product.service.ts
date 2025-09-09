@@ -26,6 +26,12 @@ export class ProductService {
       throw new ForbiddenException("only sellers can create product")
     }
 
+    const category = await this.prisma.category.findUnique({ where: { name: createProductDto.category } });
+
+    if (!createProductDto.category || !category) {
+      throw new NotFoundException('category not found')
+    }
+
     try {
       return await this.prisma.product.create({
         data: {
@@ -39,7 +45,8 @@ export class ProductService {
             create: createProductDto.images.map(img => ({
               url: img.url
             }))
-          }
+          },
+          categoryId: category.id
         },
         include: {
           images: true
@@ -64,7 +71,8 @@ export class ProductService {
       const product = await this.prisma.product.findUnique({
         where: { id },
         include: {
-          images: true
+          images: true,
+          Category: true
         }
       });
 
