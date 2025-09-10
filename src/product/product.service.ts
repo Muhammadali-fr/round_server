@@ -72,7 +72,7 @@ export class ProductService {
         where: { id },
         include: {
           images: true,
-          Category: true
+          category: true
         }
       });
 
