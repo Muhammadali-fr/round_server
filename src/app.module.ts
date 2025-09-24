@@ -5,9 +5,16 @@ import { MailerModule } from './mailer/mailer.module';
 import { ProductModule } from './product/product.module';
 import { UserModule } from './user/user.module';
 import { CategoryModule } from './category/category.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    // for .env 
+    ConfigModule.forRoot({
+      isGlobal: true
+    }),
+
+    // other stuf 
     PrismaModule,
     AuthModule,
     MailerModule,

@@ -3,7 +3,6 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuid } from 'uuid';
 import sharp from 'sharp';
-import { Express } from 'express';
 
 @Injectable()
 export class AwsService {
