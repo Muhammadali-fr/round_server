@@ -150,7 +150,7 @@ export class AuthService {
             throw new HttpException('User not found.', 404);
         }
 
-        return data;
+        return { user: data, success: true };
     }
 
     async refresh_token(token: string) {
