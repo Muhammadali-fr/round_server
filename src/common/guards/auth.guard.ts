@@ -7,32 +7,26 @@ export class JwtAuthGuard implements CanActivate {
     canActivate(context: ExecutionContext): boolean {
         const request = context.switchToHttp().getRequest<Request>();
 
-        // 1) Try cookie first
-        let token = request.cookies?.['accessToken'];
+        // ✅ Expect only Authorization header
+        const authHeader = request.headers['authorization'];
 
-        // 2) If no cookie, check Authorization header
-        if (!token) {
-            const authHeader = request.headers['authorization'];
-            if (authHeader) {
-                const [type, tokenPart] = authHeader.split(' ');
-                if (type === 'Bearer' && tokenPart) {
-                    token = tokenPart;
-                }
-            }
+        if (!authHeader) {
+            throw new UnauthorizedException('Token topilmadi (Authorization header yo‘q)');
         }
 
-        // 3) If still no token
-        if (!token) {
-            throw new UnauthorizedException('Token topilmadiiii');
+        const [type, token] = authHeader.split(' ');
+
+        if (type !== 'Bearer' || !token) {
+            throw new UnauthorizedException('Token formati noto‘g‘ri (Bearer token kerak)');
         }
 
-        // 4) Verify JWT
+        // ✅ Verify JWT
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key');
-            (request as any).user = decoded; // attach user payload
+            (request as any).user = decoded; // attach user info to request
             return true;
         } catch (err) {
-            throw new UnauthorizedException('Token noto‘g‘ri');
+            throw new UnauthorizedException('Token noto‘g‘ri yoki muddati o‘tgan');
         }
     }
 }

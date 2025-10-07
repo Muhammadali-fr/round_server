@@ -72,7 +72,7 @@ export class AuthService {
 
         if (!user) {
             throw new HttpException('User not found, please register first.', 404);
-        }
+        };
 
         const token = this.jwt.sign({
             email: user.email,
@@ -87,8 +87,8 @@ export class AuthService {
 
         return {
             message: `Magic link sent to ${user.email}, please check your email to login.`,
-        }
-    }
+        };
+    };
 
     async verify_user(token: string) {
         const secret = this.config.get<string>('JWT_SECRET');
@@ -119,8 +119,8 @@ export class AuthService {
                 throw new HttpException('User registration failed.', 500);
             }
 
-            return this.generateTokens(newUser.id, newUser.email)
-        }
+            return { tokens: this.generateTokens(newUser.id, newUser.email), success: true, message: 'Creating account...' };
+        };
 
         // Logging in user
         if (data.method === "login") {
@@ -132,7 +132,7 @@ export class AuthService {
                 throw new HttpException('User not found.', 404);
             }
 
-            return this.generateTokens(user.id, user.email)
+            return { tokens: this.generateTokens(user.id, user.email), success: true, message: 'Logging in, please wait...' };
         }
 
         throw new HttpException('Invalid token method', 400);
@@ -183,6 +183,6 @@ export class AuthService {
             return { accessToken }
         } catch (e) {
             throw new HttpException('Invalid or expired refresh token.', 401);
-        }
-    }
-}
+        };
+    };
+};
