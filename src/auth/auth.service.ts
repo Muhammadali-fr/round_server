@@ -180,7 +180,7 @@ export class AuthService {
                 { secret, expiresIn: '12h' },
             );
 
-            return { accessToken }
+            return { accessToken, success: true };
         } catch (e) {
             throw new HttpException('Invalid or expired refresh token.', 401);
         };
