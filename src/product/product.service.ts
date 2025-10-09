@@ -80,12 +80,12 @@ export class ProductService {
         throw new NotFoundException(`Product with id ${id} is not found.`);
       }
 
-      const releted = await this.prisma.product.findMany({
+      const related = await this.prisma.product.findMany({
         where: { categoryId: product.categoryId },
         take: 4
       })
 
-      return { product, releted };
+      return { product, related };
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
