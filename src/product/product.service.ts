@@ -169,4 +169,23 @@ export class ProductService {
     }
   }
 
+  async searchProducts(query: string) {
+    try {
+      const products = await this.prisma.product.findMany({
+        where: {
+          OR: [
+            { name: { contains: query, mode: 'insensitive' } },
+            { description: { contains: query, mode: 'insensitive' } },
+            { category: { name: { contains: query, mode: 'insensitive' } } },
+          ],
+        },
+      });
+
+      return {products, success: true};
+    } catch (error) {
+
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
 }
