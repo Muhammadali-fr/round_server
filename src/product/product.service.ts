@@ -60,7 +60,8 @@ export class ProductService {
 
   async find_all() {
     try {
-      return this.prisma.product.findMany();
+      const products = await this.prisma.product.findMany();
+      return { products, success: true };
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -181,7 +182,7 @@ export class ProductService {
         },
       });
 
-      return {products, success: true};
+      return { products, success: true };
     } catch (error) {
 
       throw new InternalServerErrorException(error.message);
