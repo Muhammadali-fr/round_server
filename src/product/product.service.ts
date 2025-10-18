@@ -81,10 +81,26 @@ export class ProductService {
         throw new NotFoundException(`Product with id ${id} is not found.`);
       }
 
-      const related = await this.prisma.product.findMany({
+      let related = await this.prisma.product.findMany({
         where: { categoryId: product.categoryId },
         take: 4
       })
+
+      if (related.length < 4) {
+        const needed = 4 - related.length;
+
+        const extra = await this.prisma.product.findMany({
+          where: {
+            NOT: {
+              id: product.id,
+              categoryId: product.categoryId,
+            }
+          }, take: needed,
+          orderBy: { createdAt: 'desc' }
+        });
+
+        related = [...related, ...extra];
+      };
 
       return { product, related };
     } catch (error) {
