@@ -1,30 +1,36 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Resend } from 'resend';
+import * as nodemailer from 'nodemailer';
+import { Transporter } from 'nodemailer';
 
 @Injectable()
 export class MailerService {
-  private readonly resend: Resend;
+  private readonly transporter: Transporter;
   private readonly logger = new Logger(MailerService.name);
 
   constructor() {
-    this.resend = new Resend(process.env.RESEND_API_KEY);
+    this.transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
   }
 
-  async send_mail(to: string, html: string) {
+  async send_mail(to: string, html: string, subject = 'Welcome to Raund') {
     try {
-      const response = await this.resend.emails.send({
-        from: 'onboarding@resend.dev',
+      const info = await this.transporter.sendMail({
+        from: `"Raund" <${process.env.EMAIL_USER}>`,
         to,
-        subject: 'Welcome to Raund',
+        subject,
         html,
       });
 
-      this.logger.log('✅ Email sent successfully');
-      return response;
+      this.logger.log(`Email sent: ${info.messageId}`);
+      return { success: true, messageId: info.messageId };
     } catch (error) {
-      this.logger.error('❌ Failed to send email');
-      this.logger.error(error);
-      throw error;
+      this.logger.error(`Email send failed: ${error.message}`);
+      return { success: false, error: error.message };
     }
   }
 }

@@ -87,19 +87,22 @@ export class AuthService {
 
 
         const magicLink = `${process.env.FRONTEND_URL}/auth/verify?token=${token}`;
-
         console.log('magiclinj', magicLink);
-
-        const res = await this.mailer.send_mail(
+        const { success, messageId } = await this.mailer.send_mail(
             user.email,
             `<a href="${magicLink}"><button style="background-color: #6D28D9; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Click to Login</button></a>`
         );
 
-        console.log('mail res:', res);
 
-        return {
-            message: `Magic link sent to ${user.email}, please check your email to login.`,
+        if (success) {
+            return { message: messageId, };
+        } else {
+            return { message: 'ketmadiyu bu' }
         };
+        // return {
+        //     message: `Magic link sent to ${user.email}, please check your email to login.`,
+        // };
+
     };
 
     async verify_user(token: string) {
