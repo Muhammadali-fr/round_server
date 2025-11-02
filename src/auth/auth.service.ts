@@ -66,9 +66,13 @@ export class AuthService {
     async login_user(data: login_dto) {
         const secret = this.config.get<string>('JWT_SECRET');
 
+        console.log(secret);
+
         const user = await this.prisma.user.findUnique({
             where: { email: data.email }
         });
+
+        console.log('user:', user);
 
         if (!user) {
             throw new HttpException('User not found, please register first.', 404);
@@ -79,11 +83,19 @@ export class AuthService {
             method: "login"
         }, { secret, expiresIn: '5m' });
 
+        console.log('token', token);
+
+
         const magicLink = `${process.env.FRONTEND_URL}/auth/verify?token=${token}`;
-        this.mailer.send_mail(
+
+        console.log('magiclinj', magicLink);
+
+        const res = await this.mailer.send_mail(
             user.email,
             `<a href="${magicLink}"><button style="background-color: #6D28D9; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Click to Login</button></a>`
         );
+
+        console.log('mail res:', res);
 
         return {
             message: `Magic link sent to ${user.email}, please check your email to login.`,
