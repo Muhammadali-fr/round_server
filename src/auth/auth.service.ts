@@ -7,6 +7,7 @@ import { login_dto } from './dto/login.dto';
 import { Req_with_user } from 'src/interfaces/req_with_user.interface';
 import { AwsService } from 'src/common/aws/aws.service';
 import { ConfigService } from '@nestjs/config';
+import { error } from 'console';
 
 @Injectable()
 export class AuthService {
@@ -95,14 +96,10 @@ export class AuthService {
 
 
         if (success) {
-            return { message: messageId, };
+            return { message: `Magic link sent to ${user.email}, please check your email to login.`, };
         } else {
-            return { message: 'ketmadiyu bu' }
+            return { message: 'error happened' };
         };
-        // return {
-        //     message: `Magic link sent to ${user.email}, please check your email to login.`,
-        // };
-
     };
 
     async verify_user(token: string) {
