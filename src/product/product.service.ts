@@ -33,7 +33,7 @@ export class ProductService {
     }
 
     try {
-      return await this.prisma.product.create({
+       const product =  this.prisma.product.create({
         data: {
           name: createProductDto.name,
           description: createProductDto.description,
@@ -52,6 +52,8 @@ export class ProductService {
           images: true
         }
       });
+
+      return {product, success: true};
 
     } catch (error) {
       throw new InternalServerErrorException(error.message)
