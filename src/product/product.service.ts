@@ -26,7 +26,7 @@ export class ProductService {
       throw new ForbiddenException("only sellers can create product")
     }
 
-    const category = await this.prisma.category.findUnique({ where: { name: createProductDto.category } });
+    const category = await this.prisma.category.findUnique({ where: { id: createProductDto.category } });
 
     if (!createProductDto.category || !category) {
       throw new NotFoundException('category not found')
