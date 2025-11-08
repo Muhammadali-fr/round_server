@@ -7,7 +7,6 @@ import { login_dto } from './dto/login.dto';
 import { Req_with_user } from 'src/interfaces/req_with_user.interface';
 import { AwsService } from 'src/common/aws/aws.service';
 import { ConfigService } from '@nestjs/config';
-import { error } from 'console';
 
 @Injectable()
 export class AuthService {
@@ -25,15 +24,9 @@ export class AuthService {
 
         const accessToken = this.jwt.sign(
             { id: userId, email, action: 'access' },
-            { secret, expiresIn: '12h' }
-        );
-
-        const refreshToken = this.jwt.sign(
-            { id: userId, email, action: 'refresh' },
             { secret, expiresIn: '7d' }
         );
-
-        return { accessToken, refreshToken };
+        return { accessToken };
     }
 
     async register_user(data: register_dto) {
@@ -163,38 +156,5 @@ export class AuthService {
         }
 
         return { user: data, success: true };
-    }
-
-    async refresh_token(token: string) {
-        const secret = this.config.get<string>('JWT_SECRET');
-
-        try {
-            const payload = this.jwt.verify(token, { secret });
-
-            if (!payload || payload.action !== "refresh") {
-                throw new HttpException('Invalid refresh token.', 400);
-            }
-
-            const user = await this.prisma.user.findUnique({
-                where: { email: payload.email }
-            })
-
-            if (!user) {
-                throw new HttpException('User not found.', 404);
-            }
-
-            const accessToken: string = this.jwt.sign(
-                {
-                    id: user.id,
-                    email: user.email,
-                    action: 'access',
-                },
-                { secret, expiresIn: '12h' },
-            );
-
-            return { accessToken, success: true };
-        } catch (e) {
-            throw new HttpException('Invalid or expired refresh token.', 401);
-        };
     };
 };

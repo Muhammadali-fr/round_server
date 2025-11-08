@@ -30,9 +30,4 @@ export class AuthController {
     getProfile(@Req() req: Req_with_user) {
         return this.auth_service.get_profile(req);
     };
-
-    @Post('refresh')
-    async refresh_token(@Body("token") token: string) {
-        return this.auth_service.refresh_token(token);
-    };
 };
