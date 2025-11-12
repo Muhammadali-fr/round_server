@@ -20,6 +20,7 @@ export class CategoryController {
 
     @Post()
     create(@Body() data: CreateCategoryDto) {
+        console.log(data);
         return this.categoryService.create(data);
     };
 

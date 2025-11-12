@@ -41,6 +41,8 @@ model Product {
   UserId     String
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId String
+  cart       Cart?    @relation(fields: [cartId], references: [id])
+  cartId     String?
 }
 
 model Product_images {
@@ -54,6 +56,11 @@ model Product_images {
 model Category {
   id       String    @id @default(uuid())
   name     String    @unique
+  products Product[]
+}
+
+model Cart {
+  id       String    @id @default(uuid())
   products Product[]
 }
 
