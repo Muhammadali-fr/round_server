@@ -7,13 +7,43 @@ export class CartService {
         private prisma: PrismaService
     ) { }
 
-    async create(productId:string, userId:string) {
+    async create(productId: string, userId: string) {
         try {
-            const cart =  await this.prisma.cart.create({
-                data: {
-                    
+
+            let cart = await this.prisma.cart.findFirst({
+                where: {
+                    userId
                 }
-            })
+            });
+
+            if (!cart) {
+                cart = await this.prisma.cart.create({
+                    data: { userId }
+                });
+            };
+
+            let existingItem = await this.prisma.cartItem.findFirst({
+                where: {
+                    cartId: cart.id,
+                    productId
+                }
+            });
+
+            if (existingItem) {
+                return await this.prisma.cartItem.update({
+                    where: { id: existingItem.id },
+                    data: { quantity: existingItem.quantity + 1 },
+                });
+            };
+
+            const newCartItem = await this.prisma.cartItem.create({
+                data: {
+                    cartId: cart.id,
+                    productId,
+                },
+            });
+
+            return { cart, newCartItem }
         } catch (error) {
             throw new InternalServerErrorException(error.message)
         };

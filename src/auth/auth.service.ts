@@ -147,7 +147,16 @@ export class AuthService {
         const data = await this.prisma.user.findUnique({
             where: { email: req.user.email },
             include: {
-                products: true
+                products: true,
+                cart: {
+                    include: {
+                        items: {
+                            include: {
+                                product: true,
+                            }
+                        }
+                    }
+                }
             }
         })
 
