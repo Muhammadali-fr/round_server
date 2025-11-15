@@ -7,7 +7,7 @@ export class CartService {
         private prisma: PrismaService
     ) { }
 
-    async create(productId:string) {
+    async create(productId:string, userId:string) {
         try {
             const cart =  await this.prisma.cart.create({
                 data: {
