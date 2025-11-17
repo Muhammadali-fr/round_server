@@ -30,20 +30,22 @@ export class CartService {
             });
 
             if (existingItem) {
-                return await this.prisma.cartItem.update({
+                const newItem = await this.prisma.cartItem.update({
                     where: { id: existingItem.id },
                     data: { quantity: existingItem.quantity + 1 },
                 });
+
+                return { message: 'Item added to cart successfully', item: newItem };
             };
 
-            const newCartItem = await this.prisma.cartItem.create({
+            const newItem = await this.prisma.cartItem.create({
                 data: {
                     cartId: cart.id,
                     productId,
                 },
             });
 
-            return { cart, newCartItem }
+            return { message: 'Item added to cart successfully.', item: newItem };
         } catch (error) {
             throw new InternalServerErrorException(error.message)
         };
