@@ -1,11 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
 }
 
 datasource db {
@@ -22,8 +16,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   products Product[]
-
-  cart Cart?
+  cart     Cart?
 }
 
 model Product {
@@ -36,18 +29,19 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  images Product_images[]
+  images      Product_images[]
 
-  User       User       @relation(fields: [UserId], references: [id], onDelete: Cascade)
-  UserId     String
-  category   Category   @relation(fields: [categoryId], references: [id])
-  categoryId String
-  cartItems  CartItem[]
+  User        User     @relation(fields: [UserId], references: [id], onDelete: Cascade)
+  UserId      String
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  String
+
+  cartItems   CartItem[]
 }
 
 model Product_images {
-  id  String @id @default(uuid())
-  url String
+  id        String @id @default(uuid())
+  url       String
 
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
