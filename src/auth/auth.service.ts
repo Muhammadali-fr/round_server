@@ -37,7 +37,7 @@ export class AuthService {
         });
 
         if (existUser) {
-            throw new HttpException('User already exists, please login instead.', 400);
+            throw new HttpException({ message: 'User already exists, please login instead.'}, 400);
         }
 
         const verifyToken = this.jwt.sign({
@@ -69,7 +69,7 @@ export class AuthService {
         console.log('user:', user);
 
         if (!user) {
-            throw new HttpException('User not found, please register first.', 404);
+            throw new HttpException({ message: 'User not found, please register first.' }, 404);
         };
 
         const token = this.jwt.sign({
