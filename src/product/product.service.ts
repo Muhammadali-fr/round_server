@@ -61,7 +61,11 @@ export class ProductService {
 
   async find_all() {
     try {
-      const products = await this.prisma.product.findMany();
+      const products = await this.prisma.product.findMany({
+        include: {
+          images: true
+        }
+      });
       return { products, success: true };
     } catch (error) {
       throw new InternalServerErrorException(error.message);
@@ -196,6 +200,9 @@ export class ProductService {
             { description: { contains: query, mode: 'insensitive' } },
             { category: { name: { contains: query, mode: 'insensitive' } } },
           ],
+        },
+        include: {
+          images: true,
         },
       });
 
