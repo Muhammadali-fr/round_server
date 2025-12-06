@@ -60,8 +60,6 @@ export class AuthService {
     async login_user(data: login_dto) {
         const secret = this.config.get<string>('JWT_SECRET');
 
-        console.log(secret);
-
         const user = await this.prisma.user.findUnique({
             where: { email: data.email }
         });
